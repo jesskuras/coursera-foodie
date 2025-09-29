@@ -18,18 +18,18 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
 
 export default function Recipes({ meals, categories }) {
   const navigation = useNavigation();
 
   const handlePress = async (item) => {
     try {
-      const response = await axios.get(
+      const response = await fetch(
         `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${item.idMeal}`
       );
-      if (response && response.data) {
-        const recipe = response.data.meals[0];
+      const data = await response.json();
+      if (data && data.meals) {
+        const recipe = data.meals[0];
         navigation.navigate("RecipeDetail", { ...recipe, prepTime: "15-20", servings: "2", calories: "350", difficulty: "Easy" });
       }
     } catch (err) {

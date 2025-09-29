@@ -12,7 +12,6 @@ import {
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import Categories from "../components/categories";
-import axios from "axios";
 import Recipes from "../components/recipes";
 import { useNavigation } from "@react-navigation/native";
 
@@ -35,11 +34,12 @@ export default function HomeScreen() {
 
   const getCategories = async () => {
     try {
-      const response = await axios.get(
+      const response = await fetch(
         "https://www.themealdb.com/api/json/v1/1/categories.php"
       );
-      if (response && response.data) {
-        setCategories(response.data.categories);
+      const data = await response.json();
+      if (data && data.categories) {
+        setCategories(data.categories);
       }
     } catch (err) {
       console.log("error: ", err.message);
@@ -48,11 +48,12 @@ export default function HomeScreen() {
 
   const getRecipes = async (category = "Beef") => {
     try {
-      const response = await axios.get(
+      const response = await fetch(
         `https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`
       );
-      if (response && response.data) {
-        setMeals(response.data.meals);
+      const data = await response.json();
+      if (data && data.meals) {
+        setMeals(data.meals);
       }
     } catch (err) {
       console.log("error: ", err.message);
@@ -62,11 +63,12 @@ export default function HomeScreen() {
   const handleSearch = async () => {
     if (searchQuery.trim().length > 0) {
       try {
-        const response = await axios.get(
+        const response = await fetch(
           `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchQuery}`
         );
-        if (response && response.data) {
-          setMeals(response.data.meals || []);
+        const data = await response.json();
+        if (data && data.meals) {
+          setMeals(data.meals || []);
           setActiveCategory(""); // Clear active category when searching
         }
       } catch (err) {
