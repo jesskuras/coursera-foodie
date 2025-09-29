@@ -1,94 +1,133 @@
-import { View, Text, Pressable, Image, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import React from "react";
-import {widthPercentageToDP as wp, heightPercentageToDP as hp,} from "react-native-responsive-screen";
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  StyleSheet,
+} from "react-native";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+import MasonryList from "@react-native-seoul/masonry-list";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
-export default function Recipe({ categories, foods }) {
+export default function Recipes({ meals, categories }) {
   const navigation = useNavigation();
 
-  const renderItem = ({ item, index }) => (
-<ArticleCard item={item} index={index} navigation={navigation} />
-  );
+  const handlePress = async (item) => {
+    try {
+      const response = await axios.get(
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${item.idMeal}`
+      );
+      if (response && response.data) {
+        const recipe = response.data.meals[0];
+        navigation.navigate("RecipeDetail", { ...recipe });
+      }
+    } catch (err) {
+      console.log("error: ", err.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View testID="recipesDisplay" style={styles.gridContainer}>
-        <FlatList
-          data={foods}
-          keyExtractor={(item) => item.recipeId}
-          renderItem={renderItem}
-          numColumns={2}/>
-            
+      <Text style={styles.title}>Recipes</Text>
+      <View style={styles.listContainer}>
+        {meals.length === 0 || categories.length === 0 ? null : (
+          <MasonryList
+            data={meals}
+            keyExtractor={(item) => item.idMeal}
+            numColumns={2}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item, i }) => (
+              <RecipeCard item={item} index={i} onPress={handlePress} />
+            )}
+            onEndReachedThreshold={0.1}
+          />
+        )}
       </View>
     </View>
   );
 }
 
-const ArticleCard = ({ item, index, navigation }) => {
-  return (
-    <View
-      style={[styles.cardContainer, { paddingLeft: 20, paddingRight: 15}]} testID="articleDisplay"
+const RecipeCard = ({ item, index, onPress }) => {
+  const isEven = index % 2 === 0;
+  const animatedValue = useSharedValue(0);
 
-    >
-       <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("RecipeDetail", item)
-        }
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: animatedValue.value }],
+    };
+  });
+
+  React.useEffect(() => {
+    animatedValue.value = withSpring(1);
+  }, []);
+
+  const handlePressWithAnimation = () => {
+    animatedValue.value = withSpring(0.9, {}, () => {
+      animatedValue.value = withSpring(1, {}, () => {
+        runOnJS(onPress)(item);
+      });
+    });
+  };
+
+  return (
+    <Animated.View style={[animatedStyle]}>
+      <Pressable
+        style={[styles.card, { paddingLeft: isEven ? 0 : 8 }]}
+        onPress={handlePressWithAnimation}
       >
         <Image
-          source={{ uri: item.recipeImage }}
-          style={[styles.articleImage, { height: index % 3 == 0 ? hp(25) : hp(35)}]}
+          source={{ uri: item.strMealThumb }}
+          style={styles.image(isEven)}
         />
-        <Text style={styles.articleText}>{item.recipeName}</Text>
-      </TouchableOpacity>
-   
-    </View>
+        <Text style={styles.name}>
+          {item.strMeal.length > 20
+            ? item.strMeal.slice(0, 20) + "..."
+            : item.strMeal}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  gridContainer: {
-    flexDirection: "column",
-    justifyContent: "space-between"
-  },
   container: {
-    marginHorizontal: wp(4), // mx-4 equivalent
+    marginHorizontal: wp(4),
     marginTop: hp(2),
   },
   title: {
     fontSize: hp(3),
-    fontWeight: "600", // font-semibold
-    color: "#52525B", // text-neutral-600
-    marginBottom: hp(1.5),
+    fontWeight: "600",
+    color: "#333",
   },
-  loading: {
-    marginTop: hp(20),
+  listContainer: {
+    marginTop: hp(2),
   },
-  cardContainer: {
-    justifyContent: "center",
-    marginBottom: hp(1.5),
-    flex: 1, // Allows cards to grow and fill space evenly
-  },
-  articleImage: {
+  card: {
     width: "100%",
-   
+    marginBottom: hp(2),
+    justifyContent: "center",
+  },
+  image: (isEven) => ({
+    width: "100%",
+    height: isEven ? hp(25) : hp(35),
     borderRadius: 35,
-    backgroundColor: "rgba(0, 0, 0, 0.05)", // bg-black/5
-  },
-  articleText: {
-    fontSize: hp(1.5),
-    fontWeight: "600", // font-semibold
-    color: "#52525B", // text-neutral-600
-    marginLeft: wp(2),
-    marginTop: hp(0.5),
-  },
-  articleDescription: {
-    fontSize: hp(1.2),
-    color: "#6B7280", // gray-500
-    marginLeft: wp(2),
-    marginTop: hp(0.5),
-  },
-  row: {
-    justifyContent: "space-between", // Align columns evenly
+    backgroundColor: "#00000020",
+  }),
+  name: {
+    fontSize: hp(1.8),
+    fontWeight: "600",
+    color: "#333",
+    marginTop: hp(1),
   },
 });

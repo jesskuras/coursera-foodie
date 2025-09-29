@@ -23,9 +23,12 @@ export default function RecipeDetailScreen(props) {
   const favoriterecipes = useSelector(
     (state) => state.favorites.favoriterecipes
   );
-  const isFavourite = favoriterecipes?.some(
-    (favrecipe) => favrecipe.idMeal === recipe.idMeal
-  ); // Check by idrecipe
+
+  const isFavourite = favoriterecipes?.some((favRecipe) => {
+    const favId = favRecipe.idMeal || favRecipe.idC;
+    const currentId = recipe.idMeal || recipe.idC;
+    return favId === currentId;
+  });
 
   const navigation = useNavigation();
 
@@ -35,9 +38,20 @@ export default function RecipeDetailScreen(props) {
 
   const getIngredients = (recipe) => {
     if (recipe.ingredients) {
-      return recipe.ingredients.map(ing => ({ name: ing.ingredientName, measure: ing.measure }));
+      return recipe.ingredients.map((ing) => ({
+        name: ing.ingredientName,
+        measure: ing.measure,
+      }));
     }
-    return [];
+    const ingredients = [];
+    for (let i = 1; i <= 20; i++) {
+      const ingredient = recipe[`strIngredient${i}`];
+      const measure = recipe[`strMeasure${i}`];
+      if (ingredient) {
+        ingredients.push({ name: ingredient, measure });
+      }
+    }
+    return ingredients;
   };
 
   if (!recipe) {
@@ -48,6 +62,10 @@ export default function RecipeDetailScreen(props) {
     );
   }
 
+  const recipeImage = recipe.strMealThumb || recipe.image;
+  const recipeName = recipe.strMeal || recipe.name;
+  const recipeCategory = recipe.strCategory || recipe.category;
+
   return (
     <ScrollView
       style={styles.container}
@@ -57,7 +75,7 @@ export default function RecipeDetailScreen(props) {
       {/* recipe Image */}
       <View style={styles.imageContainer} testID="imageContainer">
         <Image
-          source={{ uri: recipe.recipeImage }}
+          source={{ uri: recipeImage }}
           style={styles.recipeImage}
           testID="recipeImage"
         />
@@ -93,10 +111,10 @@ export default function RecipeDetailScreen(props) {
           testID="recipeDetailsContainer"
         >
           <Text style={styles.mealName} testID="recipeTitle">
-            {recipe.recipeName}
+            {recipeName}
           </Text>
           <Text style={styles.mealCategory} testID="recipeCategory">
-            {recipe.recipeCategory}
+            {recipeCategory}
           </Text>
         </View>
 
@@ -104,10 +122,9 @@ export default function RecipeDetailScreen(props) {
         <View style={styles.miscContainer} testID="miscContainer">
           <View style={styles.miscItem}>
             <Text style={styles.miscIcon}>🍽️</Text>
-            <Text style={styles.miscText}>{recipe.recipeOrigin}</Text>
+            <Text style={styles.miscText}>{recipe.strArea || "N/A"}</Text>
           </View>
         </View>
-
 
         {/* Ingredients */}
         <View style={styles.sectionContainer}>
@@ -127,7 +144,9 @@ export default function RecipeDetailScreen(props) {
         {/* Instructions */}
         <View style={styles.sectionContainer} testID="sectionContainer">
           <Text style={styles.sectionTitle}>Instructions</Text>
-          <Text style={styles.instructionsText}>{recipe.recipeInstructions}</Text>
+          <Text style={styles.instructionsText}>
+            {recipe.strInstructions || recipe.instructions}
+          </Text>
         </View>
 
         {/* YouTube Video Link */}
