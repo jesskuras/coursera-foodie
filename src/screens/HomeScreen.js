@@ -11,7 +11,6 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { BellIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import Categories from "../components/categories";
 import axios from "axios";
 import Recipes from "../components/recipes";
@@ -32,7 +31,6 @@ export default function HomeScreen() {
   const handleChangeCategory = (category) => {
     getRecipes(category);
     setActiveCategory(category);
-    setMeals([]);
   };
 
   const getCategories = async () => {
@@ -99,10 +97,10 @@ export default function HomeScreen() {
             style={{ height: hp(5), width: hp(5.5), borderRadius: 999 }}
           />
           <TouchableOpacity
-            onPress={() => navigation.navigate("Favorite")}
+            onPress={() => navigation.navigate("FavoriteScreen")}
             style={{ marginRight: 10 }}
           >
-            <BellIcon size={hp(4)} color="gray" />
+            <Text>Favorites</Text>
           </TouchableOpacity>
         </View>
 
@@ -154,7 +152,7 @@ export default function HomeScreen() {
                 padding: 8,
               }}
             >
-              <MagnifyingGlassIcon size={hp(2.5)} strokeWidth={3} color="gray" />
+              <Text>Search</Text>
             </View>
           </TouchableOpacity>
         </View>

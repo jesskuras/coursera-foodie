@@ -5,12 +5,12 @@ import {
   Pressable,
   Image,
   StyleSheet,
+  FlatList,
 } from "react-native";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -42,13 +42,13 @@ export default function Recipes({ meals, categories }) {
       <Text style={styles.title}>Recipes</Text>
       <View style={styles.listContainer}>
         {meals.length === 0 || categories.length === 0 ? null : (
-          <MasonryList
+          <FlatList
             data={meals}
             keyExtractor={(item) => item.idMeal}
             numColumns={2}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item, i }) => (
-              <RecipeCard item={item} index={i} onPress={handlePress} />
+            renderItem={({ item, index }) => (
+              <RecipeCard item={item} index={index} onPress={handlePress} />
             )}
             onEndReachedThreshold={0.1}
           />
@@ -83,7 +83,7 @@ const RecipeCard = ({ item, index, onPress }) => {
   return (
     <Animated.View style={[animatedStyle]}>
       <Pressable
-        style={[styles.card, { paddingLeft: isEven ? 0 : 8 }]}
+        style={[styles.card, { paddingLeft: isEven ? 0 : 8, paddingRight: isEven ? 8 : 0 }]}
         onPress={handlePressWithAnimation}
       >
         <Image
