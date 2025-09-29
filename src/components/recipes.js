@@ -81,9 +81,9 @@ const RecipeCard = ({ item, index, onPress }) => {
   };
 
   return (
-    <Animated.View style={[animatedStyle]}>
+    <Animated.View style={[animatedStyle, { flex: 1, padding: 4 }]}>
       <Pressable
-        style={[styles.card, { paddingLeft: isEven ? 0 : 8, paddingRight: isEven ? 8 : 0 }]}
+        style={styles.card}
         onPress={handlePressWithAnimation}
       >
         <Image
@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     marginBottom: hp(2),
-    justifyContent: "center",
   },
   image: (isEven) => ({
     width: "100%",
