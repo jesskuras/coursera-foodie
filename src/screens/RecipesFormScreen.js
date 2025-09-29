@@ -10,9 +10,42 @@ export default function RecipesFormScreen({ route, navigation }) {
   const [description, setDescription] = useState(
     recipeToEdit ? recipeToEdit.description : ""
   );
+  const [prepTime, setPrepTime] = useState(recipeToEdit ? recipeToEdit.prepTime : "");
+  const [servings, setServings] = useState(recipeToEdit ? recipeToEdit.servings : "");
+  const [calories, setCalories] = useState(recipeToEdit ? recipeToEdit.calories : "");
+  const [difficulty, setDifficulty] = useState(recipeToEdit ? recipeToEdit.difficulty : "");
 
   const saverecipe = async () => {
- 
+    const newrecipe = {
+      title,
+      image,
+      description,
+      prepTime,
+      servings,
+      calories,
+      difficulty,
+    };
+
+    try {
+      const existingrecipes = await AsyncStorage.getItem("recipes");
+      let recipes = existingrecipes ? JSON.parse(existingrecipes) : [];
+
+      if (recipeToEdit) {
+        // If we are editing, replace the existing recipe with the new one
+        recipes[recipeIndex] = newrecipe;
+      } else {
+        // Otherwise, add the new recipe to the list
+        recipes.push(newrecipe);
+      }
+
+      await AsyncStorage.setItem("recipes", JSON.stringify(recipes));
+      if (onrecipeEdited) {
+        onrecipeEdited(newrecipe, recipeIndex);
+      }
+      navigation.goBack(); // Go back after saving
+    } catch (error) {
+      console.error("Failed to save recipe:", error);
+    }
   };
 
   return (
@@ -41,6 +74,30 @@ export default function RecipesFormScreen({ route, navigation }) {
         multiline={true}
         numberOfLines={4}
         style={[styles.input, { height: hp(20), textAlignVertical: "top" }]}
+      />
+      <TextInput
+        placeholder="Prep Time"
+        value={prepTime}
+        onChangeText={setPrepTime}
+        style={styles.input}
+      />
+        <TextInput
+        placeholder="Servings"
+        value={servings}
+        onChangeText={setServings}
+        style={styles.input}
+      />
+        <TextInput
+        placeholder="Calories"
+        value={calories}
+        onChangeText={setCalories}
+        style={styles.input}
+      />
+        <TextInput
+        placeholder="Difficulty"
+        value={difficulty}
+        onChangeText={setDifficulty}
+        style={styles.input}
       />
       <TouchableOpacity onPress={saverecipe} style={styles.saveButton}>
         <Text style={styles.saveButtonText}>Save recipe</Text>

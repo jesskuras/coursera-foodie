@@ -74,6 +74,24 @@ import {
         {/* Recipe Details */}
         <View style={styles.contentContainer} testID="contentContainer">
         <Text style={styles.recipeTitle}>{recipe.title}</Text>
+        <View style={styles.miscContainer} testID="miscContainer">
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>🕒</Text>
+            <Text style={styles.miscText}>{recipe.prepTime || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>🍽️</Text>
+            <Text style={styles.miscText}>{recipe.servings || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>🔥</Text>
+            <Text style={styles.miscText}>{recipe.calories || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>👨‍🍳</Text>
+            <Text style={styles.miscText}>{recipe.difficulty || "N/A"}</Text>
+          </View>
+        </View>
   <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>Content</Text>
     <Text style={styles.contentText}>{recipe.description}</Text>

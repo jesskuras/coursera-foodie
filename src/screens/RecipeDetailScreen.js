@@ -121,8 +121,20 @@ export default function RecipeDetailScreen(props) {
         {/* Misc */}
         <View style={styles.miscContainer} testID="miscContainer">
           <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>🕒</Text>
+            <Text style={styles.miscText}>{recipe.prepTime || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
             <Text style={styles.miscIcon}>🍽️</Text>
-            <Text style={styles.miscText}>{recipe.strArea || "N/A"}</Text>
+            <Text style={styles.miscText}>{recipe.servings || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>🔥</Text>
+            <Text style={styles.miscText}>{recipe.calories || "N/A"}</Text>
+          </View>
+          <View style={styles.miscItem}>
+            <Text style={styles.miscIcon}>👨‍🍳</Text>
+            <Text style={styles.miscText}>{recipe.difficulty || "N/A"}</Text>
           </View>
         </View>
 

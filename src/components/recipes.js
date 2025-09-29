@@ -30,7 +30,7 @@ export default function Recipes({ meals, categories }) {
       );
       if (response && response.data) {
         const recipe = response.data.meals[0];
-        navigation.navigate("RecipeDetail", { ...recipe });
+        navigation.navigate("RecipeDetail", { ...recipe, prepTime: "15-20", servings: "2", calories: "350", difficulty: "Easy" });
       }
     } catch (err) {
       console.log("error: ", err.message);
