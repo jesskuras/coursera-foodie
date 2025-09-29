@@ -1,4 +1,4 @@
-import { View,Text,TextInput,TouchableOpacity,Image,StyleSheet,} from "react-native";
+import { View,Text,TextInput,TouchableOpacity,Image,StyleSheet, ScrollView} from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {widthPercentageToDP as wp,heightPercentageToDP as hp,} from "react-native-responsive-screen";
@@ -7,9 +7,8 @@ export default function RecipesFormScreen({ route, navigation }) {
   const { recipeToEdit, recipeIndex, onrecipeEdited } = route.params || {};
   const [title, setTitle] = useState(recipeToEdit ? recipeToEdit.title : "");
   const [image, setImage] = useState(recipeToEdit ? recipeToEdit.image : "");
-  const [description, setDescription] = useState(
-    recipeToEdit ? recipeToEdit.description : ""
-  );
+  const [ingredients, setIngredients] = useState(recipeToEdit ? recipeToEdit.ingredients : "");
+  const [instructions, setInstructions] = useState(recipeToEdit ? recipeToEdit.instructions : "");
   const [prepTime, setPrepTime] = useState(recipeToEdit ? recipeToEdit.prepTime : "");
   const [servings, setServings] = useState(recipeToEdit ? recipeToEdit.servings : "");
   const [calories, setCalories] = useState(recipeToEdit ? recipeToEdit.calories : "");
@@ -19,7 +18,8 @@ export default function RecipesFormScreen({ route, navigation }) {
     const newrecipe = {
       title,
       image,
-      description,
+      ingredients,
+      instructions,
       prepTime,
       servings,
       calories,
@@ -42,14 +42,14 @@ export default function RecipesFormScreen({ route, navigation }) {
       if (onrecipeEdited) {
         onrecipeEdited(newrecipe, recipeIndex);
       }
-      navigation.goBack(); // Go back after saving
+      navigation.navigate("MyFood");
     } catch (error) {
       console.error("Failed to save recipe:", error);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <TextInput
         placeholder="Title"
         value={title}
@@ -68,9 +68,17 @@ export default function RecipesFormScreen({ route, navigation }) {
         <Text style={styles.imagePlaceholder}>Upload Image URL</Text>
       )}
       <TextInput
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
+        placeholder="Ingredients (comma separated)"
+        value={ingredients}
+        onChangeText={setIngredients}
+        multiline={true}
+        numberOfLines={4}
+        style={[styles.input, { height: hp(15), textAlignVertical: "top" }]}
+      />
+      <TextInput
+        placeholder="Instructions"
+        value={instructions}
+        onChangeText={setInstructions}
         multiline={true}
         numberOfLines={4}
         style={[styles.input, { height: hp(20), textAlignVertical: "top" }]}
@@ -102,7 +110,7 @@ export default function RecipesFormScreen({ route, navigation }) {
       <TouchableOpacity onPress={saverecipe} style={styles.saveButton}>
         <Text style={styles.saveButtonText}>Save recipe</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 

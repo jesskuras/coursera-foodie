@@ -9,7 +9,7 @@ import {
   } from "react-native";
   import React, { useEffect, useState } from "react";
   import AsyncStorage from "@react-native-async-storage/async-storage";
-  import { useNavigation } from "@react-navigation/native";
+  import { useNavigation, useFocusEffect } from "@react-navigation/native";
   import {
     widthPercentageToDP as wp,
     heightPercentageToDP as hp,
@@ -20,28 +20,56 @@ import {
     const [recipes, setrecipes] = useState([]);
     const [loading, setLoading] = useState(true);
   
-    useEffect(() => {
-      const fetchrecipes = async () => {
-        
-        };
-  
-      fetchrecipes();
-    }, []);
+    useFocusEffect(
+      React.useCallback(() => {
+        const fetchrecipes = async () => {
+            try {
+              const existingrecipes = await AsyncStorage.getItem("recipes");
+              if (existingrecipes) {
+                setrecipes(JSON.parse(existingrecipes));
+              }
+            } catch (error) {
+              console.error("Failed to fetch recipes:", error);
+            } finally {
+              setLoading(false);
+            }
+          };
+    
+        fetchrecipes();
+      }, [])
+    );
   
     const handleAddrecipe = () => {
-
+        navigation.navigate("RecipesFormScreen");
     };
   
     const handlerecipeClick = (recipe) => {
-
+        navigation.navigate("CustomRecipesScreen", { recipe });
     };
     const deleterecipe = async (index) => {
-    
+        try {
+            const updatedrecipes = [...recipes];
+            updatedrecipes.splice(index, 1);
+            setrecipes(updatedrecipes);
+            await AsyncStorage.setItem("recipes", JSON.stringify(updatedrecipes));
+          } catch (error) {
+            console.error("Failed to delete recipe:", error);
+          }
     };
   
     const editrecipe = (recipe, index) => {
-
+        navigation.navigate("RecipesFormScreen", {
+            recipeToEdit: recipe,
+            recipeIndex: index,
+            onrecipeEdited: handleEditedrecipe,
+          });
     };
+
+    const handleEditedrecipe = (editedrecipe, index) => {
+        const updatedrecipes = [...recipes];
+        updatedrecipes[index] = editedrecipe;
+        setrecipes(updatedrecipes);
+      };
   
     return (
       <View style={styles.container}>
@@ -64,17 +92,31 @@ import {
               recipes.map((recipe, index) => (
                 <View key={index} style={styles.recipeCard} testID="recipeCard">
                   <TouchableOpacity testID="handlerecipeBtn" onPress={() => handlerecipeClick(recipe)}>
-                  
+                  {recipe.image && (
+                      <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+                    )}
                     <Text style={styles.recipeTitle}>{recipe.title}</Text>
-                    <Text style={styles.recipeDescription} testID="recipeDescp">
-                  
+                    <Text style={styles.recipeIngredients} testID="recipeIngredients">
+                      {recipe.ingredients.length > 100
+                        ? recipe.ingredients.slice(0, 100) + "..."
+                        : recipe.ingredients}
                     </Text>
                   </TouchableOpacity>
   
                   {/* Edit and Delete Buttons */}
                   <View style={styles.actionButtonsContainer} testID="editDeleteButtons">
-                    
-                
+                    <TouchableOpacity
+                      onPress={() => editrecipe(recipe, index)}
+                      style={styles.editButton}
+                    >
+                      <Text style={styles.editButtonText}>Edit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => deleterecipe(index)}
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteButtonText}>Delete</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               ))
@@ -152,7 +194,7 @@ import {
       color: "#111827",
       marginBottom: hp(0.5),
     },
-    recipeDescription: {
+    recipeIngredients: {
       fontSize: hp(1.8),
       color: "#6B7280",
       marginBottom: hp(1.5),
